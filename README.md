@@ -162,10 +162,12 @@ These metrics directly map to business KPIs such as accident reduction, congesti
 ---
 
 ## 9. Repository Structure  
+```text
 LLM-Traffic-Signal-Optimization/
 │
 ├── README.md
-├── .gitignore
+│   └── Project overview, business framing, feasibility analysis,
+│       and milestone documentation.
 │
 ├── docs/
 │   ├── milestone1_report.pdf
@@ -173,21 +175,39 @@ LLM-Traffic-Signal-Optimization/
 │
 ├── data/
 │   ├── raw/
+│   │   └── Original dataset (Zenodo traffic scenarios).
+│   │
 │   └── processed/
+│       └── Cleaned and formatted data for modeling.
 │
 ├── baseline/
-│   └── baseline_model_card.md
+│   ├── baseline_model_card.md
+│   └── baseline_description.md
+│       └── Documentation of selected LLM baseline, training setup,
+│           reproducibility notes, and limitations.
 │
 ├── notebooks/
+│   ├── exploratory_analysis.ipynb
 │   └── milestone2_poc.ipynb
+│       └── Proof-of-concept experiments and baseline evaluation.
 │
 ├── src/
 │   ├── data_pipeline/
+│   │   └── Data ingestion and preprocessing components.
+│   │
 │   ├── modeling/
+│   │   └── Model training, fine-tuning, and inference logic.
+│   │
 │   └── evaluation/
+│       └── Metric computation (AWT, ATT, AQL, safety metrics).
 │
-└── references/
-    └── references.bib
+├── references/
+│   └── references.bib
+│       └── Bibliography for literature review.
+│
+└── video_presentation_link.txt
+    └── Link to 7-minute recorded presentation.
+```
     
 ---
 
