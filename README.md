@@ -165,27 +165,30 @@ These metrics directly map to business KPIs such as accident reduction, congesti
 LLM-Traffic-Signal-Optimization/
 │
 ├── README.md
+├── .gitignore
 │
 ├── docs/
-│ ├── milestone1_report.pdf
-│ ├── presentation_slides.pdf
+│   ├── milestone1_report.pdf
+│   └── presentation_slides.pdf
 │
 ├── data/
-│ ├── raw/
-│ ├── processed/
+│   ├── raw/
+│   └── processed/
 │
 ├── baseline/
-│ ├── baseline_description.md
+│   └── baseline_model_card.md
 │
 ├── notebooks/
-│ ├── exploratory_analysis.ipynb
+│   └── milestone2_poc.ipynb
 │
-├── references/
-│ ├── bibliography.bib
+├── src/
+│   ├── data_pipeline/
+│   ├── modeling/
+│   └── evaluation/
 │
-└── video_presentation_link.txt
-
-
+└── references/
+    └── references.bib
+    
 ---
 
 ## 10. Next Milestones  
