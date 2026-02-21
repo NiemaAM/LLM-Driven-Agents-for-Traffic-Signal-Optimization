@@ -1,227 +1,218 @@
-# LLM-Driven Agents for Traffic Signal Optimization  
-CSC5382 – AI for Digital Transformation  
-Milestone 1 – Project Inception  
+**🏷️ Tags:** `traffic-control` `intelligent-transportation` `large-language-model` `safety-detection` `human-in-the-loop` `smart-city`
+<div align="center">
+<h1>🚦 LLM-Driven Agents for Traffic Signal Optimization 🚗</h1>
+CSC5382 – AI for Digital Transformation
+</div>
+
+# Table of content
+[1. Milestone 1: Project Inception](#1-milestone-1-project-inception)
+- [1.1. Framing the Business Idea as an ML Problem](#11-framing-the-business-idea-as-an-ml-problem)
+  - [Business Case Description](#-buisness-case-description)
+  - [Business Value of Using ML](#-business-value-of-using-ml)
+  - [Data Overview](#data-overview)
+  - [Project Archetype](#-project-archetype)
+- [1.2. Feasibility Analysis](#12-feasibility-analysis)
+  - [Literature Review](#-literature-review)
+  - [Model Choice / Specification of a Baseline](#-model-choice-specification-of-a-baseline)
+  - [Metrics for Business Goal Evaluation](#-metrics-for-business-goal-evaluation)
+
+[2. Milestone 2: Baseline Proof-of-Concept (PoC)](#2-milestone-2-baseline-proof-of-concept-poc)
+
+[3. Milestone 3: Data Ingestion & Validation Pipeline](#3-milestone-3-data-ingestion--validation-pipeline)
+
+[4. Milestone 4: Model Training & Experiment Tracking](#4-milestone-4-model-training--experiment-tracking)
+
+[5. Milestone 5: Deployment & API Serving](#5-milestone-5-deployment--api-serving)
+
+[6. Milestone 6: Monitoring & Continual Learning](#6-milestone-6-monitoring--continual-learning)
 
 ---
 
-## 1. Project Overview  
-
-Urban congestion remains a critical challenge in modern cities, causing increased travel times, fuel consumption, environmental pollution, and economic losses. Traditional traffic signal control systems rely on fixed-time schedules or manually engineered adaptive logic, which struggle to respond to dynamic and unpredictable traffic conditions.
-
-This project proposes an **LLM-driven traffic signal optimization system**, where Large Language Models (LLMs) act as intelligent agents that:
-
-- Interpret traffic state descriptions  
-- Detect potential vehicle conflicts  
-- Propose optimized signal phase transitions  
-- Iteratively refine policies based on simulation feedback  
-
-The system is designed as a **Human-in-the-Loop AI Decision Support System** for urban planners and smart city operators.
+# 1. Milestone 1: Project Inception
+**Report:** [HERE](docs/milestone1_report.pdf)
 
 ---
 
-## 2. Business Case  
+## 1.1. Framing the Business Idea as an ML Problem  
+### 📄 Buisness Case Description
 
-### Problem  
-Urban intersections suffer from congestion and safety risks due to static or rule-based traffic signal systems.
+Urban congestion is one of the most pressing challenges in modern cities, leading to increased travel times, fuel consumption, air pollution, and economic losses. Traditional traffic signal control systems rely on fixed timing plans or rule-based adaptive logic, which often fail to respond efficiently to dynamic traffic patterns.
+This project proposes the development of LLM-driven agents for traffic signal optimization, where Large Language Models (LLMs) are used to generate, refine, and optimize traffic signal control policies. The system leverages traffic datasets and simulation environments to evaluate and iteratively improve signal timing strategies.
 
-### Target Stakeholders  
-- Municipal traffic authorities  
-- Smart city operators  
-- Urban infrastructure planners  
+The LLM functions as an intelligent decision-support agent capable of:
 
-### Proposed Solution  
-Deploy an LLM-driven intelligent agent capable of generating and refining traffic signal control strategies using structured traffic data and simulation environments.
+- Generating traffic signal control logic.
+- Interpreting traffic state representations.
+- Proposing optimized signal phase transitions.
+- Iteratively refining policies based on performance feedback.
+
+The system is designed for urban planners, municipalities, and smart city operators seeking AI-assisted traffic optimization solutions.
+
+### 🧠 Business value of using ML
+Applying ML and LLM-based agents to traffic signal optimization provides measurable value:
+ 
+**🚦 Operational Value**
+
+- Smoother traffic flow
+- Reduced congestion at intersections
+- Shorter vehicle waiting times
+- Increased road network throughput
+
+**🌳 Environmental Value**
+
+- Reduced CO₂ emissions
+- Reduced idle engine time
+- Improved urban air quality
+
+**📈 Economic Value**
+
+- Reduced fuel consumption
+- Lower operational costs
+- Reduced time lost due to congestion
+- Improved public transportation reliability
+
+**🏙️ Strategic Value**
+
+- Scalable across cities
+- Adaptable to changing traffic patterns
+- Reduced dependency on manually engineered traffic rules
+ 
+Compared to fixed-time or manually optimized systems, LLM-driven systems can adapt faster and propose alternative strategies automatically.
+
+### Data Overview
+
+**📌 Source:** https://doi.org/10.5281/zenodo.14171745
+
+This dataset contains simulated multi-lane intersection traffic scenarios with annotated conflict events. It provides structured traffic state variables alongside labeled conflict occurrences and recommended control actions. The dataset is primarily used for conflict detection and safety-aware traffic signal decision modeling. 
+
+- [data](data/generated_dataset.csv)
+- [intersection layout](data/intersection_layout.json)
+
+**Data description:**
+
+- 🚗 Input Data Table (Vehicle Scenario Features):
+
+| Feature                    | Description                      | Example  |
+| -------------------------- | -------------------------------- | -------- |
+| `vehicle_id`               | Unique vehicle identifier        | `V7657`  |
+| `lane`                     | Lane number where the vehicle is | `6`      |
+| `speed`                    | Vehicle speed (km/h or m/s)      | `62.36`  |
+| `distance_to_intersection` | Distance to intersection (m)     | `319.51` |
+| `direction`                | Travel direction                 | `south`  |
+| `destination`              | Intended exit / destination      | `A`      |
+
+- ⚠️ Labels Table (Conflict & Control Information):
+
+| Label                 | Description                                 | Example                                                             |
+| --------------------- | ------------------------------------------- | ------------------------------------------------------------------- |
+| `is_conflict`         | Whether a traffic conflict occurs           | `yes`                                                               |
+| `number_of_conflicts` | Number of conflicts in the scenario         | `1`                                                                 |
+| `places_of_conflicts` | Locations of conflicts                      | `['intersection']`                                                  |
+| `conflict_vehicles`   | Vehicle pairs involved in conflicts         | `[{'vehicle1_id': 'V7657', 'vehicle2_id': 'V4314'}]`                |
+| `decisions`           | Recommended actions for vehicles            | `['Potential conflict: Vehicle V7657 must yield to Vehicle V4314']` |
+| `priority_order`      | Vehicle priority ranking (1 = highest)      | `{'V4314': 1, 'V7657': 2, 'V5246': None, 'V2448': None}`            |
+| `waiting_times`       | Vehicle waiting time (relative or absolute) | `{'V4314': 0, 'V7657': 2, 'V5246': 0, 'V2448': 0}`                  |
+
+### 🔷 Project Archetype
+
+This project follows the Human-in-the-Loop AI System archetype characterized by:
+
+- The LLM generates signal control strategies.
+- A simulation engine evaluates their performance.
+- Engineers validate or refine outputs.
+- Iterative feedback improves performance.
+
+This positions the system as an AI-Orchestrated Decision Support System for Intelligent Transportation Infrastructure. The LLM does not directly control physical infrastructure without validation but operates within a supervised optimization loop.
 
 ---
 
-## 3. Business Value of Using ML  
-
-### Operational Value  
-- Reduced congestion  
-- Shorter vehicle waiting times  
-- Increased intersection throughput  
-
-### Environmental Value  
-- Reduced CO₂ emissions  
-- Reduced idle engine time  
-- Improved air quality  
-
-### Economic Value  
-- Lower fuel consumption  
-- Reduced operational costs  
-- Improved transport efficiency  
-
-### Strategic Value  
-- Scalable across cities  
-- Adaptable to evolving traffic patterns  
-- Reduced dependency on manual rule engineering  
-
----
-
-## 4. Dataset  
-
-**Source:** https://doi.org/10.5281/zenodo.14171745  
-
-The dataset contains simulated multi-lane intersection traffic scenarios with annotated conflict events.
-
-### Input Features  
-
-- vehicle_id  
-- lane  
-- speed  
-- distance_to_intersection  
-- direction  
-- destination  
-
-### Labels  
-
-- is_conflict  
-- conflict_vehicles  
-- priority_order  
-- waiting_times  
-- decisions  
-
-The dataset supports safety-aware traffic signal modeling and conflict detection tasks.
-
----
-
-## 5. Project Archetype  
-
-This project follows the **Human-in-the-Loop AI System** archetype:
-
-1. LLM generates signal control strategies  
-2. Simulation engine evaluates performance  
-3. Engineers validate results  
-4. Iterative refinement improves system performance  
-
-The system does **not directly control physical infrastructure** without validation.
-
----
-
-## 6. Literature Review Summary  
+## 1.2. Feasibility Analysis
+### 📚 Literature review
 
 Recent 2025 research demonstrates successful use of LLMs for traffic signal control:
 
-- **Masri et al. (2025)** – 4D LLM traffic control architecture  
-- **LLM-TrafficBrain** – Semantic prompt-based dynamic signal control  
-- **LLMLight** – LLM as direct traffic signal control agent  
-- **LLM-DCTSC** – Coordinated multi-intersection optimization with DPO  
+- **Masri et al. (2025)** formalized LLMs as centralized traffic controllers using a 4D system (Detect, Decide, Disseminate, Deploy).  
+- **Li et al. (2025)** introduced LLM-TrafficBrain, a semantic reasoning framework for dynamic signal control.  
+- **Lai et al. (2025)** proposed LLMLight, directly employing LLMs as traffic signal control agents.  
+- **Wang et al. (2025)** developed LLM-DCTSC for coordinated signal phase and duration optimization.
 
-These works demonstrate:
+Full references are provided [Here](references/references.bib).
 
-- Chain-of-Thought reasoning improves interpretability  
-- Fine-tuned LLMs outperform heuristic methods  
-- Closed-loop systems improve congestion metrics  
+| Approach | Direct Agent Decision-Making | Chain-of-Thought (CoT) | Fine-Tuned Model | Actionable Driver Guidance | Emergency Vehicle Priority | Closed-Loop Feedback | RL Integration | Conflict Detection & Resolution | Natural Language Rationales |
+|-----------|-----------------------------|-------------------------|------------------|----------------------------|---------------------------|---------------------|---------------|-------------------------------|----------------------------|
+| Masri et al. (2025) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ |
+| LLM-TrafficBrain (2025) | ✓ | ◐ | ✗ | ✗ | ✓ | ✓ | ✗ | ✗ | ✓ |
+| LLMLight (2025) | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ◐ | ✗ | ✓ |
+| LLM-DCTSC (2025) | ✓ | ✓ | ✓ | ✗ | ✗ | ✓ | ◐ | ✗ | ✓ |
+ 
+<div align="center"> ✓ = Fully Supported  ◐ = Partially Supported  ✗ = Not Supported </div>
 
----
+### 🤖 Model choice/ Specification of a baseline
 
-## 7. Baseline Model  
+- **Model Name:** Intersection Conflict Detection LLM
+- **Repository:** https://github.com/sarimasri3/Intersection-Conflict-Detection/ 
+- **Reference Paper:** Masri et al. (2025) 
+- Full description available in [Model Card](model/model_card.md).
 
-**Model Name:** Intersection Conflict Detection LLM  
-**Repository:** https://github.com/sarimasri3/Intersection-Conflict-Detection/  
+### 📊 Metrics for business goal evaluation
 
-### Baseline Characteristics  
+Model evaluation must align with business objectives.
 
-- Base Model: GPT-family lightweight variant  
-- Training: Supervised fine-tuning  
-- Task: Conflict detection + reasoning generation  
-- Output: Conflict status + recommended action  
+#### **⚠️ Safety-Oriented Metrics:**
 
-### Intended Use  
+Since intersection safety is a primary concern:
 
-- Intersection-level safety detection  
-- Simulation-based optimization experiments  
+- **Precision:** Minimizes false conflict alarms
+- **Recall:** Minimizes missed conflicts (critical for safety)
+- **F1-Score:** Balanced safety-performance tradeoff
+- **False Negative Rate (FNR):** Directly related to accident risk
 
-### Limitations  
+Reducing false negatives is directly linked to preventing potential collisions, which aligns with the safety and liability reduction objectives of municipalities.
 
-- Trained on simulated data  
-- Limited network-level coordination  
-- May degrade under unseen distributions  
+#### **🚘 Operational Efficiency Metrics:**
 
----
+To measure congestion reduction:
 
-## 8. Evaluation Metrics  
+- **Average Waiting Time (AWT):** The average amount of time vehicles spends stopped or delayed at an intersection before proceeding.
+- **Average Travel Time (ATT):** The average total time it takes for a vehicle to pass through the intersection or road segment.
+- **Average Queue Length (AQL):** The average number of vehicles waiting in line at an intersection during a given time period.
+- **Intersection Throughput:** The total number of vehicles that successfully pass through an intersection within a specified time interval.
 
-### Safety Metrics  
-- Precision  
-- Recall  
-- F1-Score  
-- False Negative Rate (FNR)  
+Reducing AWT and AQL directly supports:
 
-### Operational Metrics  
-- Average Waiting Time (AWT)  
-- Average Travel Time (ATT)  
-- Average Queue Length (AQL)  
-- Intersection Throughput  
+- Reduced fuel consumption
+- Reduced CO₂ emissions
+- Improved commuter satisfaction
 
-### Cost-Sensitive Evaluation  
-Higher penalty assigned to safety-critical false negatives.
+These metrics reflect measurable economic and environmental impact.
 
-These metrics directly map to business KPIs such as accident reduction, congestion mitigation, and emission reduction.
+#### **💰 Cost-Sensitive Evaluation:**
 
----
+Different errors have different consequences:
 
-## 9. Repository Structure  
-```text
-LLM-Traffic-Signal-Optimization/
-│
-├── README.md
-│   └── Project overview, business framing, feasibility analysis,
-│       and milestone documentation.
-│
-├── docs/
-│   ├── milestone1_report.pdf
-│   └── presentation_slides.pdf
-│
-├── data/
-│   ├── raw/
-│   │   └── Original dataset (Zenodo traffic scenarios).
-│   │
-│   └── processed/
-│       └── Cleaned and formatted data for modeling.
-│
-├── baseline/
-│   ├── baseline_model_card.md
-│   └── baseline_description.md
-│       └── Documentation of selected LLM baseline, training setup,
-│           reproducibility notes, and limitations.
-│
-├── notebooks/
-│   ├── exploratory_analysis.ipynb
-│   └── milestone2_poc.ipynb
-│       └── Proof-of-concept experiments and baseline evaluation.
-│
-├── src/
-│   ├── data_pipeline/
-│   │   └── Data ingestion and preprocessing components.
-│   │
-│   ├── modeling/
-│   │   └── Model training, fine-tuning, and inference logic.
-│   │
-│   └── evaluation/
-│       └── Metric computation (AWT, ATT, AQL, safety metrics).
-│
-├── references/
-│   └── references.bib
-│       └── Bibliography for literature review.
-│
-└── video_presentation_link.txt
-    └── Link to 7-minute recorded presentation.
-```
-    
----
+- **False negatives:** Safety risk
+- **False positives:** Unnecessary traffic delays
 
-## 10. Next Milestones  
-
-- Milestone 2: Baseline Proof-of-Concept (PoC)  
-- Milestone 3: Data ingestion & validation pipeline  
-- Milestone 4: Model training & experiment tracking  
-- Milestone 5: Deployment & API serving  
-- Milestone 6: Monitoring & continual learning  
+A cost matrix will be used to assign higher penalties to safety-critical errors.
 
 ---
 
-## 11. References  
+## 2. Milestone 2: Baseline Proof-of-Concept (PoC)  
 
-Full reference list available in `/references` and in milestone report.
+---
 
+## 3. Milestone 3: Data ingestion & validation pipeline  
+
+---
+
+## 4. Milestone 4: Model training & experiment tracking  
+
+---
+
+## 5. Milestone 5: Deployment & API serving  
+
+---
+
+## 6. Milestone 6: Monitoring & continual learning  
+
+---
