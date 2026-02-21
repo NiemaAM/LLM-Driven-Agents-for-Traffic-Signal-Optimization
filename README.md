@@ -176,12 +176,18 @@ Full references are provided [Here](references/references.bib).
  
 <div align="center"> ✓ = Fully Supported  ◐ = Partially Supported  ✗ = Not Supported </div>
 
-### 🤖 Model choice/ Specification of a baseline
+### 🤖 Model choice/ Specification of a baseline*
 
 - **Model Name:** Intersection Conflict Detection LLM
 - **Repository:** https://github.com/sarimasri3/Intersection-Conflict-Detection/ 
 - **Reference Paper:** Masri et al. (2025) 
 - Full description available in [Model Card](model/model_card.md).
+
+**Arguments for Baseline Choice**
+
+- The baseline uses existing repo code and synthetic data, meeting the requirement of having both the binary model and the notebook/code to retrain.
+- Provides clear separation of conflict vs no-conflict, allowing future model improvements (e.g., deep learning, probabilistic forecasting) to be benchmarked.
+- Leverages state-of-the-art simulation-based ML techniques from recent traffic research while remaining reproducible in Colab.
 
 ### 📊 Metrics for business goal evaluation
 
