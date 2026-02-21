@@ -86,10 +86,38 @@ Compared to fixed-time or manually optimized systems, LLM-driven systems can ada
 
 This dataset contains simulated multi-lane intersection traffic scenarios with annotated conflict events. It provides structured traffic state variables alongside labeled conflict occurrences and recommended control actions. The dataset is primarily used for conflict detection and safety-aware traffic signal decision modeling. 
 
-- [data](data/generated_dataset.csv)
-- [intersection layout](data/intersection_layout.json)
+#### Data Generation Process:
 
-**Data description:**
+**📍 Synthetic Scenario Generation**
+
+The data is generated using a [script](src/generate_data.py) that programmatically generates vehicle traffic scenarios for intersections. Each scenario consists of random or parameterized sets of vehicles with attributes like: `vehicle_id`, `lane`, `speed`, `distance_to_intersection`, `direction`, `destination`.
+
+This simulated traffic data is created without real world measurements and is used as training/test input for conflict detection and classification.
+
+**📍 Intersection Layout Specification**
+
+The generated data uses a predefined intersection layout stored in [data/intersection_layout.json](data/intersection_layout.json). This defines:
+
+  - Incoming directions (north, south, east, west)
+  - Lane configurations
+  - Valid destinations/exits
+
+The generator uses this layout to assign realistic trajectories and entry/exit paths to vehicles within each scenario.
+
+**📍 Random & Controlled Variation**
+
+The generation script usually supports arguments to control:
+
+  - Total number of records
+  - Number of vehicles per scenario (fixed or variable)
+
+This allows creation of large datasets covering diverse intersection traffic situations for conflict detection experiments.
+
+**📍 Export to Disk**
+
+After generation, the created dataset is exported to CSV format within [data/generate_data.py](data/generated_dataset.csv).
+
+#### Data description:
 
 - 🚗 Input Data Table (Vehicle Scenario Features):
 
