@@ -189,6 +189,30 @@ Full references are provided [Here](references/references.bib).
 - Provides clear separation of conflict vs no-conflict, allowing future model improvements (e.g., deep learning, probabilistic forecasting) to be benchmarked.
 - Leverages state-of-the-art simulation-based ML techniques from recent traffic research while remaining reproducible in Colab.
 
+The fine-tuning process was performed through an API-based workflow, meaning the trained model is hosted by the provider and not stored locally as downloadable weights.
+
+Because the model was fine-tuned via an external API, raw model weights are not exportable. However, we provide:
+
+- The complete fine-tuning script
+- The training dataset
+- The evaluation pipeline
+- Configuration parameters
+
+This ensures full reproducibility of the experiment.
+
+**Summary of Model Comparisons (from evaluation)**
+
+| Model                           | Setting               | Best Result                   |
+| ------------------------------- | --------------------- | ----------------------------- |
+| **GPT-mini (fine-tuned)**       | Mixed vehicle dataset | ~83 % accuracy (best overall) |
+| GPT-4o-mini (fine-tuned)        | Four vehicles         | ~81 % accuracy                |
+| GPT-4o-mini (fine-tuned)        | Eight vehicles        | ~71 % accuracy                |
+| GPT-mini (zero-shot)            | Mixed scenarios       | ~62 % accuracy                |
+| Meta-LLaMA-3.1 variants         | Fine-tuned            | ~51 % accuracy (moderate)     |
+| Gemini (fine-tuned & zero-shot) | Various               | Lower performance overall     |
+
+In the context of this project and its evaluations, the fine-tuned GPT-mini model delivered the best conflict-detection performance among the tested LLMs.
+
 ### 📊 Metrics for business goal evaluation
 
 Model evaluation must align with business objectives.
