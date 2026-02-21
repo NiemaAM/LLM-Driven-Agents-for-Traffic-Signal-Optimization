@@ -31,7 +31,7 @@ CSC5382 – AI for Digital Transformation
 # 1. Milestone 1: Project Inception
 - **Report:** [HERE](docs/milestone1_report.pdf)
 - **Video presentation:** [HERE](docs/milestone1_report.pdf)
-
+- **Notebook:** [HERE](LLM_Driven_Agents_for_Traffic_Signal_Optimization.ipynb)
 ---
 
 ## 1.1. Framing the Business Idea as an ML Problem  
