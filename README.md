@@ -29,7 +29,8 @@ CSC5382 – AI for Digital Transformation
 ---
 
 # 1. Milestone 1: Project Inception
-**Report:** [HERE](docs/milestone1_report.pdf)
+- **Report:** [HERE](docs/milestone1_report.pdf)
+- **Video presentation:** [HERE](docs/milestone1_report.pdf)
 
 ---
 
