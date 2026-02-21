@@ -31,7 +31,7 @@ CSC5382 – AI for Digital Transformation
 # 1. Milestone 1: Project Inception
 - **Report:** [HERE](docs/milestone1_report.pdf)
 - **Video presentation:** [HERE](docs/milestone1_report.pdf)
-
+- **Notebook:** [HERE](LLM_Driven_Agents_for_Traffic_Signal_Optimization.ipynb)
 ---
 
 ## 1.1. Framing the Business Idea as an ML Problem  
@@ -165,6 +165,14 @@ Recent 2025 research demonstrates successful use of LLMs for traffic signal cont
 - **Lai et al. (2025)** proposed LLMLight, directly employing LLMs as traffic signal control agents.  
 - **Wang et al. (2025)** developed LLM-DCTSC for coordinated signal phase and duration optimization.
 
+In a subsequent study, Masri et al. (2025) formalize the role of LLMs as centralized traffic controllers through a 4D system model (Detect, Decide, Disseminate, and Deploy) [1]. This methodology integrates traditionally disconnected control processes into a single LLM-driven architecture that can process heterogeneous data from GPS, video imaging, and loop detectors. The authors utilized fine-tuned models and ROUGE-L metrics to confirm that GPT-4o-mini excels in priority assignment and waiting time optimization. This new paradigm demonstrates that LLMs can provide precise, context-aware recommendations that align with established traffic regulations while enhancing overall intersection safety.
+
+Li et al. present LLM-TrafficBrain, an information-centric framework designed for dynamic signal control through semantic reasoning [2]. This architecture transforms structured sensor data—including queue lengths and special events—into semantically rich natural language prompts for processing by an LLM. The framework operates in a closed-loop feedback system, allowing the model to self-correct and adjust timing strategies based on real-time performance metrics like vehicle throughput and average delay. Evaluation via the SUMO simulator showed that the system is highly responsive to emergency vehicle priority requests and unpredictable traffic spikes. 
+
+Lai et al. introduce LLMLight, the first framework to directly employ LLMs as decision-making agents for TSC rather than just auxiliary tools [3]. The authors developed LightGPT, a specialized backbone LLM optimized through imitation fine-tuning and a critic-guided policy refinement process. This approach leverages Chain-of-Thought (CoT) reasoning to analyze traffic conditions and execute optimal signal phases. Extensive testing across ten datasets demonstrated that LightGPT offers superior generalization and interpretability compared to traditional heuristic and RL-based methods.
+
+Wang et al. introduce LLM-DCTSC [4], an agent-driven framework that jointly optimizes signal phases and durations to improve traffic management granularity. By incorporating neighboring intersection data, the system avoids local optima and enhances global coordination. The framework employs a two-stage training pipeline featuring supervised fine-tuning and Direct Preference Optimization (DPO), guided by a reinforcement learning reward model. Utilizing Chain-of-Thought reasoning, LLM-DCTSC delivers interpretable decisions and achieves state-of-the-art performance in travel time and queue reduction across varied traffic conditions.
+
 Full references are provided [Here](references/references.bib).
 
 | Approach | Direct Agent Decision-Making | Chain-of-Thought (CoT) | Fine-Tuned Model | Actionable Driver Guidance | Emergency Vehicle Priority | Closed-Loop Feedback | RL Integration | Conflict Detection & Resolution | Natural Language Rationales |
@@ -176,12 +184,42 @@ Full references are provided [Here](references/references.bib).
  
 <div align="center"> ✓ = Fully Supported  ◐ = Partially Supported  ✗ = Not Supported </div>
 
-### 🤖 Model choice/ Specification of a baseline
+### 🤖 Model choice/ Specification of a baseline*
 
 - **Model Name:** Intersection Conflict Detection LLM
 - **Repository:** https://github.com/sarimasri3/Intersection-Conflict-Detection/ 
 - **Reference Paper:** Masri et al. (2025) 
 - Full description available in [Model Card](model/model_card.md).
+
+**Arguments for Baseline Choice**
+
+- The baseline uses existing repo code and synthetic data, meeting the requirement of having both the binary model and the notebook/code to retrain.
+- Provides clear separation of conflict vs no-conflict, allowing future model improvements (e.g., deep learning, probabilistic forecasting) to be benchmarked.
+- Leverages state-of-the-art simulation-based ML techniques from recent traffic research while remaining reproducible in Colab.
+
+The fine-tuning process was performed through an API-based workflow, meaning the trained model is hosted by the provider and not stored locally as downloadable weights.
+
+Because the model was fine-tuned via an external API, raw model weights are not exportable. However, we provide:
+
+- The complete fine-tuning script
+- The training dataset
+- The evaluation pipeline
+- Configuration parameters
+
+This ensures full reproducibility of the experiment.
+
+**Summary of Model Comparisons (from evaluation)**
+
+| Model                           | Setting               | Best Result                   |
+| ------------------------------- | --------------------- | ----------------------------- |
+| **GPT-mini (fine-tuned)**       | Mixed vehicle dataset | ~83 % accuracy (best overall) |
+| GPT-4o-mini (fine-tuned)        | Four vehicles         | ~81 % accuracy                |
+| GPT-4o-mini (fine-tuned)        | Eight vehicles        | ~71 % accuracy                |
+| GPT-mini (zero-shot)            | Mixed scenarios       | ~62 % accuracy                |
+| Meta-LLaMA-3.1 variants         | Fine-tuned            | ~51 % accuracy (moderate)     |
+| Gemini (fine-tuned & zero-shot) | Various               | Lower performance overall     |
+
+In the context of this project and its evaluations, the fine-tuned GPT-mini model delivered the best conflict-detection performance among the tested LLMs.
 
 ### 📊 Metrics for business goal evaluation
 
