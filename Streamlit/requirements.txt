@@ -1,0 +1,13 @@
+pandas
+openai
+pandas
+scikit-learn
+matplotlib
+seaborn
+python-dotenv==1.0.1
+together==1.2.0
+requests==2.31.0
+pandas
+matplotlib
+seaborn
+scikit-learn
