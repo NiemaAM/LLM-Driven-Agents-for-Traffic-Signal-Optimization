@@ -266,8 +266,210 @@ Different errors have different consequences:
 A cost matrix will be used to assign higher penalties to safety-critical errors.
 
 ---
+# 2. Milestone 2: Baseline Proof-of-Concept (PoC)
 
-## 2. Milestone 2: Baseline Proof-of-Concept (PoC)  
+> **Live Demo:** [trafficllm.streamlit.app](https://trafficllm.streamlit.app)
+> **App source:** [`Streamlit/`](./Streamlit/)
+
+---
+
+## 2.1. Overview
+
+Milestone 2 delivers a fully interactive **Streamlit web application** that implements the baseline conflict detection system from [Masri et al. (2025)](https://arxiv.org/abs/2411.10869) as a visual Proof-of-Concept. The app allows users to build custom vehicle scenarios, run the rule-based conflict detection engine, and observe both the detected conflicts and their resolution through real-time animated intersection visualizations.
+
+The PoC demonstrates the feasibility of the core pipeline:
+
+```
+Scenario Input → Conflict Detection → Priority Assignment → Wait Time Computation → Animated Visualization
+```
+
+---
+
+## 2.2. App Structure
+
+```
+Streamlit/
+├── app.py                  ← Main Streamlit entrypoint
+├── requirements.txt        ← Python dependencies
+src/
+├── conflict_detection.py   ← Baseline conflict detection engine
+├── visualization.py        ← Plotly animated intersection renderer
+├── data_generation.py      ← Synthetic scenario generator
+data/
+├── intersection_layout.json ← Lane/direction/destination mapping
+├── generated_dataset.csv   ← Generated training data (auto-created)
+```
+
+---
+
+## 2.3. Features
+
+### 🚗 Vehicle Scenario Builder
+An interactive form replaces raw JSON input. Users build scenarios vehicle-by-vehicle using validated fields:
+
+| Field | Input Type | Details |
+|---|---|---|
+| `vehicle_id` | Text | Auto-suggested (V001, V002…), must be unique |
+| `lane` | Dropdown | Lanes 1–8, each showing its direction automatically |
+| `direction` | Auto (read-only) | Derived from selected lane — no manual entry |
+| `destination` | Dropdown | Populated dynamically from `intersection_layout.json` for the chosen lane |
+| `speed` | Number input | km/h, 1–200 |
+| `distance_to_intersection` | Number input | Meters, 1–5000 |
+
+### 📋 Live JSON Sync
+The vehicle list and a raw JSON panel are shown **side by side** and stay in sync in real time:
+- Adding or removing a vehicle instantly updates the JSON panel
+- Editing the JSON directly updates the vehicle list (with inline validation)
+- The **Detect Conflicts** button always reads from the live JSON — direct JSON edits are always included
+
+### 🚦 Intersection Visualization (Problem View)
+An animated Plotly figure showing the scenario as entered, with no resolution applied:
+- Vehicles approach from their correct lane positions at **physics-accurate speeds** — a vehicle doing 100 km/h over 100 m reaches the stop-line much sooner than one doing 30 km/h
+- Lane numbers **1–8** are shown as badges on each road arm with directional arrows
+- Conflicting vehicle pairs are connected by a **red dashed line** through the intersection centre
+- Hover tooltips show vehicle ID, direction, lane, speed, TTA (time-to-intersection), and movement type
+
+### ✅ Conflict Resolution Visualization (Solution View)
+The same animation replayed with the wait times from `detect_conflicts()` applied:
+- Lower-priority vehicles **pause at the stop-line** for exactly their assigned wait duration before crossing
+- Priority-1 vehicles proceed immediately; the separation is clearly visible in the animation
+- A summary table below shows each conflict pair, their priority order (🥇 / 🔴 yield), and wait times in seconds
+
+### 📊 Conflict Detection Results
+Raw output of `detect_conflicts()` displayed inline, showing for each conflict:
+- Vehicle pair IDs
+- Decision message (who yields to whom)
+- Priority order dictionary
+- Waiting times dictionary
+
+### 📈 Dataset Generation
+A sidebar button generates a 1,000-record synthetic dataset using `data_generation.py` and saves it to `data/generated_dataset.csv`, with a preview table in the sidebar.
+
+---
+
+## 2.4. Intersection Layout
+
+The app uses a fixed 4-way intersection with 8 lanes and 8 exit destinations (A–H):
+
+```
+              N
+        ┌─────┴─────┐
+   H    │  1  │  2  │   A
+   ──── │─────│─────│ ────
+   E,D,C│     │     │  F
+        └─────┬─────┘
+              S: B,D / A,G,H
+```
+
+| Direction | Lane | Type | Valid Destinations |
+|-----------|------|------|--------------------|
+| North | 1 | Entry (right/straight) | F, H |
+| North | 2 | Exit ← | E, D, C |
+| East | 3 | Exit ← | H, B |
+| East | 4 | Entry (left) | G, E, F |
+| South | 5 | Entry (right/straight) | B, D |
+| South | 6 | Exit ← | A, G, H |
+| West | 7 | Exit ← | D, F |
+| West | 8 | Entry (left) | B, C, A |
+
+---
+
+## 2.5. Baseline Conflict Detection Logic
+
+The baseline engine (`src/conflict_detection.py`) implements the rule-based system from Masri et al. (2025). For each pair of vehicles it:
+
+1. **Checks if paths cross** — using movement types (straight / left / right) and direction rules (e.g. opposite straights don't conflict, adjacent left turns do)
+2. **Checks arrival time proximity** — conflicts only trigger if both vehicles arrive within a 4-second threshold
+3. **Applies priority rules** in order:
+   - Straight over turn
+   - Right turn over left turn
+   - Right-hand rule (vehicle on the right has priority)
+   - Later-arriving vehicle yields if time difference > 1s
+4. **Computes waiting times** — the yielding vehicle waits until the priority vehicle has cleared the box (TTA + 2s crossing time)
+
+Returns a `list[dict]` with keys: `vehicle1_id`, `vehicle2_id`, `decision`, `place`, `priority_order`, `waiting_times`.
+
+---
+
+## 2.6. Speed-Aware Animation Model
+
+The animation timeline is computed from real vehicle physics, not fixed fractions:
+
+```
+total_sim_time = max over all vehicles of:
+    time_to_intersection + wait_seconds + 4s (box crossing)
+
+For each vehicle:
+    approach_end = TTA / total_sim_time     ← reaches stop-line here
+    wait_end     = (TTA + wait) / total_sim_time  ← starts crossing here
+```
+
+This means vehicles with different speeds and distances reach the stop-line at different points in the animation, accurately reflecting when conflicts would actually occur.
+
+---
+
+## 2.7. Running Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/NiemaAM/LLM-Driven-Agents-for-Traffic-Signal-Optimization.git
+cd LLM-Driven-Agents-for-Traffic-Signal-Optimization
+
+# Install dependencies
+pip install -r Streamlit/requirements.txt
+
+# Run the app
+streamlit run Streamlit/app.py
+```
+
+The app will open at `http://localhost:8501`.
+
+---
+
+## 2.8. Deployment
+
+The app is deployed on **Streamlit Community Cloud** and rebuilds automatically on every push to `main`.
+
+To redeploy manually or set up a new deployment:
+1. Go to [share.streamlit.io](https://share.streamlit.io)
+2. Connect your GitHub account
+3. Set **Main file path** to `Streamlit/app.py`
+4. Set **Branch** to `main`
+
+Dependencies are managed via `Streamlit/requirements.txt`.
+
+---
+
+## 2.9. Example Scenario
+
+The app loads with this default two-vehicle conflict scenario:
+
+```json
+{
+  "vehicles_scenario": [
+    {
+      "vehicle_id": "V001",
+      "lane": 1,
+      "speed": 50,
+      "distance_to_intersection": 100,
+      "direction": "north",
+      "destination": "F"
+    },
+    {
+      "vehicle_id": "V002",
+      "lane": 3,
+      "speed": 50,
+      "distance_to_intersection": 100,
+      "direction": "east",
+      "destination": "B"
+    }
+  ]
+}
+```
+
+**Expected output:** V001 (north → straight) and V002 (east → straight) approach from perpendicular directions at the same speed and distance — a classic crossing conflict. The right-hand rule assigns priority to V002 (on the right of V001), so V001 must yield with a computed wait time.
+
+---
 
 ---
 
