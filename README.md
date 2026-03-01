@@ -38,7 +38,7 @@ CSC5382 – AI for Digital Transformation
 ---
 
 # 1. Milestone 1: Project Inception
-> **Report:** [HERE](docs/milestone1_report.pdf)
+> **Report:** [HERE](docs/trafficLLM-Milestone1.pdf)
 > 
 > **Notebook:** [HERE](LLM_Driven_Agents_for_Traffic_Signal_Optimization.ipynb)
 > 
@@ -283,9 +283,9 @@ A cost matrix will be used to assign higher penalties to safety-critical errors.
 > 
 > **App source:** [`Streamlit/`](./Streamlit/)
 >
-> **Report:**
+> **Report:** [HERE](docs/trafficLLM-Milestone1.pdf)
 >
-> **Presentation:**
+> **Video Presentation:**
 
 ---
 
