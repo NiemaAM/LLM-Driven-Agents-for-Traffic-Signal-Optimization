@@ -444,6 +444,8 @@ Dependencies are managed via `Streamlit/requirements.txt`.
 
 The app loads with this default two-vehicle conflict scenario:
 
+https://github.com/user-attachments/assets/f610a451-dfbc-4764-b468-f01ae383ecfe
+
 ```json
 {
   "vehicles_scenario": [
@@ -468,6 +470,8 @@ The app loads with this default two-vehicle conflict scenario:
 ```
 
 **Expected output:** V001 (north → straight) and V002 (east → straight) approach from perpendicular directions at the same speed and distance — a classic crossing conflict. The right-hand rule assigns priority to V002 (on the right of V001), so V001 must yield with a computed wait time.
+
+https://github.com/user-attachments/assets/02d05a07-a455-4d5f-b525-beb84a9ee4b7
 
 ---
 
