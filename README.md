@@ -17,6 +17,15 @@ CSC5382 – AI for Digital Transformation
   - [Metrics for Business Goal Evaluation](#-metrics-for-business-goal-evaluation)
 
 [2. Milestone 2: Baseline Proof-of-Concept (PoC)](#2-milestone-2-baseline-proof-of-concept-poc)
+- [2.1. Overview](#21-overview)
+- [2.2. App Structure](#22-app-structure)
+- [2.3. Features](#23-features)
+- [2.4. Intersection Layout](#24-intersection-layout)
+- [2.5. Baseline Conflict Detection Logic](#25-baseline-conflict-detection-logic)
+- [2.6. Speed-Aware Animation Model](#26-speed-aware-animation-model)
+- [2.7. Running Locally](#27-running-locally)
+- [2.8. Deployment](#28-deployment)
+- [2.9. Example Scenario](#29-example-scenario)
 
 [3. Milestone 3: Data Ingestion & Validation Pipeline](#3-milestone-3-data-ingestion--validation-pipeline)
 
@@ -29,9 +38,11 @@ CSC5382 – AI for Digital Transformation
 ---
 
 # 1. Milestone 1: Project Inception
-- **Report:** [HERE](docs/milestone1_report.pdf)
-- **Notebook:** [HERE](LLM_Driven_Agents_for_Traffic_Signal_Optimization.ipynb)
-- **Video presentation:**
+> **Report:** [HERE](docs/milestone1_report.pdf)
+> 
+> **Notebook:** [HERE](LLM_Driven_Agents_for_Traffic_Signal_Optimization.ipynb)
+> 
+> **Video presentation:**
 
 [![Watch the video](https://img.youtube.com/vi/Mm5viEheXXs/0.jpg)](https://youtu.be/Mm5viEheXXs)
 
@@ -269,7 +280,12 @@ A cost matrix will be used to assign higher penalties to safety-critical errors.
 # 2. Milestone 2: Baseline Proof-of-Concept (PoC)
 
 > **Live Demo:** [trafficllm.streamlit.app](https://trafficllm.streamlit.app)
+> 
 > **App source:** [`Streamlit/`](./Streamlit/)
+>
+> **Report:**
+>
+> **Presentation:**
 
 ---
 
@@ -351,15 +367,7 @@ A sidebar button generates a 1,000-record synthetic dataset using `data_generati
 
 The app uses a fixed 4-way intersection with 8 lanes and 8 exit destinations (A–H):
 
-```
-              N
-        ┌─────┴─────┐
-   H    │  1  │  2  │   A
-   ──── │─────│─────│ ────
-   E,D,C│     │     │  F
-        └─────┬─────┘
-              S: B,D / A,G,H
-```
+<img width="612" height="628" alt="image" src="https://github.com/user-attachments/assets/daf6baf3-376b-4a4e-b78d-c762fb4c01f6" />
 
 | Direction | Lane | Type | Valid Destinations |
 |-----------|------|------|--------------------|
