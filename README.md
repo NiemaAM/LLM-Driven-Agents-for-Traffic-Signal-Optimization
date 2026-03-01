@@ -287,6 +287,8 @@ A cost matrix will be used to assign higher penalties to safety-critical errors.
 >
 > **Video Presentation:**
 
+[![Watch the video](https://img.youtube.com/vi/RlBGMhz3KaE/0.jpg)](https://youtu.be/RlBGMhz3KaE)
+
 ---
 
 ## 2.1. Overview
