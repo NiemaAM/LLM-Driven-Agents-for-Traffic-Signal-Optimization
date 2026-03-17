@@ -487,7 +487,247 @@ https://github.com/user-attachments/assets/02d05a07-a455-4d5f-b525-beb84a9ee4b7
 
 ---
 
-## 3. Milestone 3: Data ingestion & validation pipeline  
+# 3. Milestone 3 – Data Ingestion, Validation & Preparation
+
+> **Pipeline source:** [`pipeline/`](./pipeline/)
+> **Processed data:** [`data/processed/`](./data/processed/)
+> **Schema & reports:** [`data/schema/`](./data/schema/)
+> **Feature store:** [`data/feature_store/`](./data/feature_store/)
+
+---
+
+## 3.1. Overview
+
+Milestone 3 establishes a fully automated, end-to-end data pipeline that takes the raw synthetic intersection dataset and transforms it into clean, validated, versioned, and feature-engineered data ready for model training. The pipeline covers all six required areas — ingestion, validation, preprocessing, versioning, orchestration, and feature storage — and runs as a single tracked execution producing reproducible outputs.
+
+The full pipeline is executed with one command from the repo root:
+
+```bash
+python -m pipeline.run_pipeline
+```
+
+---
+
+## 3.2. Requirement Coverage
+
+| Requirement | Tool Used | Status |
+|---|---|---|
+| Raw data ingestion + storage | Custom ingester + Parquet | ✅ 18,055 vehicle rows from 5,000 scenarios |
+| Data validation / schema inference | Great Expectations v0.18 | ✅ 21/21 checks, 0 anomalies |
+| Preprocessing + feature engineering | scikit-learn Pipeline | ✅ 7 new features incl. `time_to_intersection` |
+| Data versioning | DVC | ✅ `.dvc` pointer files tracking all outputs |
+| Full ML pipeline | Custom orchestrator | ✅ 4/4 steps, 49s end-to-end |
+| Feature store | Feast (local SQLite) | ✅ Materialised + retrieval test passed |
+
+---
+
+## 3.3. Pipeline Structure
+
+```
+pipeline/
+├── __init__.py
+├── ingest.py          ← Step 1: parse JSON, flatten, split 80/20
+├── validate.py        ← Step 2: Great Expectations validation
+├── transform.py       ← Step 3: feature engineering
+├── feature_store.py   ← Step 4: Feast feature store
+└── run_pipeline.py    ← Orchestrator: runs all steps in order
+data/
+├── raw/
+│   └── generated_dataset.csv        ← 5,000 scenarios (DVC tracked)
+├── processed/
+│   ├── train.parquet                 ← 80% split (14,411 vehicle rows)
+│   ├── eval.parquet                  ← 20% split (3,644 vehicle rows)
+│   ├── flattened_dataset.csv         ← all 18,055 vehicle rows
+│   ├── transformed_dataset.csv       ← feature-engineered dataset (DVC tracked)
+│   ├── feature_metadata.json         ← feature names and artifact paths
+│   └── artifacts/
+│       ├── scaler.pkl                ← fitted StandardScaler
+│       ├── encoder_direction.pkl     ← fitted LabelEncoder
+│       └── encoder_destination.pkl  ← fitted LabelEncoder
+├── schema/
+│   ├── schema.json                   ← inferred schema + value ranges (DVC tracked)
+│   └── anomalies.json                ← eval set anomaly report
+└── feature_store/
+    ├── feature_store.yaml            ← Feast config
+    ├── features.py                   ← entity + feature view definitions
+    ├── vehicle_features.parquet      ← offline store (DVC tracked)
+    ├── registry.db                   ← Feast registry
+    └── online_store.db               ← Feast SQLite online store
+```
+
+---
+
+## 3.4. Step 1 — Raw Data Ingestion (`ingest.py`)
+
+The raw dataset stores each traffic scenario as a JSON string in a single `scenario` column. The ingestion step parses this structure and explodes each vehicle into its own row, preserving all scenario-level labels.
+
+**Input:** `data/raw/generated_dataset.csv` — 5,000 rows, one per scenario
+
+**Key columns in raw data:**
+
+| Column | Description |
+|---|---|
+| `scenario` | JSON string containing a list of vehicles with their attributes |
+| `is_conflict` | Whether a conflict exists in the scenario (`yes` / `no`) |
+| `number_of_conflicts` | Count of conflicts detected (0–5) |
+| `conflict_vehicles` | Vehicle pairs involved in conflicts |
+| `decisions` | Recommended actions for yielding vehicles |
+| `priority_order` | Priority rank per vehicle (1 = highest) |
+| `waiting_times` | Computed wait time per vehicle in seconds |
+
+**Output:** `data/processed/train.parquet` (14,411 rows) and `eval.parquet` (3,644 rows), split by scenario ID to prevent data leakage between splits.
+
+The flattened schema adds per-vehicle fields: `scenario_id`, `vehicle_id`, `lane`, `speed`, `distance_to_intersection`, `direction`, `destination` alongside all scenario-level labels.
+
+---
+
+## 3.5. Step 2 — Data Validation (`validate.py`)
+
+Data validation is performed using **Great Expectations v0.18** via the `PandasDataset` API. The same suite of 21 expectations is applied to both the training and evaluation sets.
+
+**Expectations defined:**
+
+| Category | Expectation | Result |
+|---|---|---|
+| Schema | All 8 required columns exist | ✅ |
+| Nulls | No null values in 6 critical columns | ✅ |
+| Range | `lane` between 1 and 8 | ✅ |
+| Range | `speed` between 0 and 200 km/h | ✅ |
+| Range | `distance_to_intersection` between 0 and 5,000 m | ✅ |
+| Range | `number_of_conflicts` between 0 and 10 | ✅ |
+| Set | `direction` ∈ {north, south, east, west} | ✅ |
+| Set | `is_conflict` ∈ {yes, no} | ✅ |
+| Count | Row count between 100 and 100,000 | ✅ |
+
+**Training set statistics:**
+
+| Feature | Min | Mean | Max | Std |
+|---|---|---|---|---|
+| `speed` (km/h) | 20.0 | 49.8 | 80.0 | 17.2 |
+| `distance_to_intersection` (m) | 50.0 | 274.3 | 499.9 | 130.0 |
+| `lane` | 1 | 4.5 | 8 | 2.3 |
+| `number_of_conflicts` | 0 | 0.66 | 5 | 0.88 |
+
+**Conflict balance:** 7,829 no-conflict (54%) vs 6,615 conflict (46%) in the training set — a near-balanced distribution suitable for classification without resampling.
+
+Results are saved to `data/schema/schema.json` (inferred schema with value ranges and valid categorical sets) and `data/schema/anomalies.json` (empty — no anomalies detected).
+
+---
+
+## 3.6. Step 3 — Feature Engineering (`transform.py`)
+
+Preprocessing is applied using **scikit-learn** transformers. All fitted artifacts are saved to `data/processed/artifacts/` for reproducibility in downstream training and inference.
+
+**Transformations applied:**
+
+| Feature | Transformation | Output column |
+|---|---|---|
+| `speed` | Z-score normalisation (`StandardScaler`) | `speed_scaled` |
+| `distance_to_intersection` | Z-score normalisation (`StandardScaler`) | `distance_scaled` |
+| `lane` | Min-max scaling to [0, 1] over range 1–8 | `lane_scaled` |
+| `direction` | Vocabulary integer encoding (`LabelEncoder`) | `direction_encoded` |
+| `destination` | Vocabulary integer encoding (`LabelEncoder`) | `destination_encoded` |
+| `speed` + `distance` | **Derived:** distance ÷ speed (m/s) | `time_to_intersection` |
+| `scenario_id` | **Derived:** vehicle count per scenario | `vehicles_in_scenario` |
+| `is_conflict` | Binary mapping yes→1, no→0 | `is_conflict_encoded` |
+
+The `time_to_intersection` feature directly mirrors the physics used by the conflict detection engine, making it the most predictive feature for downstream classification. The `vehicles_in_scenario` feature captures intersection congestion level.
+
+---
+
+## 3.7. Step 4 — Feature Store (`feature_store.py`)
+
+Features are registered and materialised using **Feast** in local mode with a SQLite online store. This enables consistent feature retrieval for both offline training and future online inference.
+
+**Entity:** `vehicle_entity_id` (integer, one per vehicle row)
+
+**Feature view:** `vehicle_features` — TTL 365 days, backed by `vehicle_features.parquet`
+
+**Registered features:** `speed`, `distance_to_intersection`, `lane`, `speed_scaled`, `distance_scaled`, `lane_scaled`, `time_to_intersection`, `vehicles_in_scenario`, `direction_encoded`, `destination_encoded`, `is_conflict_encoded`
+
+Feature retrieval is validated at the end of the step:
+
+```python
+features = store.get_historical_features(
+    entity_df=entity_df,
+    features=["vehicle_features:speed_scaled",
+              "vehicle_features:is_conflict_encoded"],
+).to_df()
+```
+
+Sample output (3 rows retrieved successfully):
+
+| vehicle_entity_id | speed_scaled | is_conflict_encoded |
+|---|---|---|
+| 0 | 0.244 | 1 |
+| 1 | 1.018 | 1 |
+| 2 | 1.234 | 1 |
+
+---
+
+## 3.8. Data Versioning with DVC
+
+All data inputs and outputs are tracked with **DVC** so that every pipeline run is reproducible and data changes are version-controlled alongside code.
+
+```bash
+# Files tracked by DVC
+data/raw/generated_dataset.csv
+data/processed/transformed_dataset.csv
+data/schema/schema.json
+data/feature_store/vehicle_features.parquet
+```
+
+Each tracked file has a corresponding `.dvc` pointer file committed to Git. To reproduce the exact dataset used in this milestone:
+
+```bash
+dvc pull
+python -m pipeline.run_pipeline
+```
+
+---
+
+## 3.9. Running the Pipeline
+
+**Requirements:**
+
+```bash
+pip install great-expectations==0.18.19 dvc feast scikit-learn pandas pyarrow joblib sqlalchemy-utils
+```
+
+**Run all steps:**
+
+```bash
+# From the repo root
+$env:PYTHONPATH = "."          # PowerShell (Windows)
+# export PYTHONPATH=.          # bash (Linux/Mac)
+
+python -m pipeline.run_pipeline
+```
+
+**Run individual steps:**
+
+```bash
+python -m pipeline.ingest
+python -m pipeline.validate
+python -m pipeline.transform
+python -m pipeline.feature_store
+```
+
+**Expected output:**
+
+```
+============================================================
+  PIPELINE SUMMARY
+============================================================
+  ✅ PASSED  1. Data Ingestion
+  ✅ PASSED  2. Data Validation
+  ✅ PASSED  3. Feature Engineering
+  ✅ PASSED  4. Feature Store
+
+  4/4 steps passed  |  total time: 49.0s
+============================================================
+  🎉 All steps completed successfully!
+```
 
 ---
 

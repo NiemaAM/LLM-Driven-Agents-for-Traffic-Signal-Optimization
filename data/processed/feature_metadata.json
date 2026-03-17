@@ -1,0 +1,22 @@
+{
+  "numeric_features": [
+    "speed_scaled",
+    "distance_scaled",
+    "lane_scaled",
+    "time_to_intersection"
+  ],
+  "categorical_features": [
+    "direction_encoded",
+    "destination_encoded"
+  ],
+  "derived_features": [
+    "time_to_intersection",
+    "vehicles_in_scenario"
+  ],
+  "label": "is_conflict_encoded",
+  "artifacts": {
+    "scaler": "artifacts/scaler.pkl",
+    "encoder_direction": "artifacts/encoder_direction.pkl",
+    "encoder_destination": "artifacts/encoder_destination.pkl"
+  }
+}
