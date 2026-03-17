@@ -4,30 +4,43 @@
 CSC5382 – AI for Digital Transformation
 </div>
 
-# Table of content
+# Table of Contents
+
 [1. Milestone 1: Project Inception](#1-milestone-1-project-inception)
-- [1.1. Framing the Business Idea as an ML Problem](#11-framing-the-business-idea-as-an-ml-problem)
-  - [Business Case Description](#-buisness-case-description)
-  - [Business Value of Using ML](#-business-value-of-using-ml)
-  - [Data Overview](#data-overview)
-  - [Project Archetype](#-project-archetype)
-- [1.2. Feasibility Analysis](#12-feasibility-analysis)
-  - [Literature Review](#-literature-review)
-  - [Model Choice / Specification of a Baseline](#-model-choice-specification-of-a-baseline)
-  - [Metrics for Business Goal Evaluation](#-metrics-for-business-goal-evaluation)
+
+* [1.1. Framing the Business Idea as an ML Problem](#11-framing-the-business-idea-as-an-ml-problem)
+  + [Business Case Description](#-buisness-case-description)
+  + [Business Value of Using ML](#-business-value-of-using-ml)
+  + [Data Overview](#data-overview)
+  + [Project Archetype](#-project-archetype)
+* [1.2. Feasibility Analysis](#12-feasibility-analysis)
+  + [Literature Review](#-literature-review)
+  + [Model Choice / Specification of a Baseline](#-model-choice-specification-of-a-baseline)
+  + [Metrics for Business Goal Evaluation](#-metrics-for-business-goal-evaluation)
 
 [2. Milestone 2: Baseline Proof-of-Concept (PoC)](#2-milestone-2-baseline-proof-of-concept-poc)
-- [2.1. Overview](#21-overview)
-- [2.2. App Structure](#22-app-structure)
-- [2.3. Features](#23-features)
-- [2.4. Intersection Layout](#24-intersection-layout)
-- [2.5. Baseline Conflict Detection Logic](#25-baseline-conflict-detection-logic)
-- [2.6. Speed-Aware Animation Model](#26-speed-aware-animation-model)
-- [2.7. Running Locally](#27-running-locally)
-- [2.8. Deployment](#28-deployment)
-- [2.9. Example Scenario](#29-example-scenario)
 
-[3. Milestone 3: Data Ingestion & Validation Pipeline](#3-milestone-3-data-ingestion--validation-pipeline)
+* [2.1. Overview](#21-overview)
+* [2.2. App Structure](#22-app-structure)
+* [2.3. Features](#23-features)
+* [2.4. Intersection Layout](#24-intersection-layout)
+* [2.5. Baseline Conflict Detection Logic](#25-baseline-conflict-detection-logic)
+* [2.6. Speed-Aware Animation Model](#26-speed-aware-animation-model)
+* [2.7. Running Locally](#27-running-locally)
+* [2.8. Deployment](#28-deployment)
+* [2.9. Example Scenario](#29-example-scenario)
+
+[3. Milestone 3: Data Ingestion, Validation & Preparation](#3-milestone-3--data-ingestion-validation--preparation)
+
+* [3.1. Overview](#31-overview)
+* [3.2. Requirement Coverage](#32-requirement-coverage)
+* [3.3. Pipeline Structure](#33-pipeline-structure)
+* [3.4. Step 1 — Raw Data Ingestion](#34-step-1--raw-data-ingestion-ingestpy)
+* [3.5. Step 2 — Data Validation](#35-step-2--data-validation-validatepy)
+* [3.6. Step 3 — Feature Engineering](#36-step-3--feature-engineering-transformpy)
+* [3.7. Step 4 — Feature Store](#37-step-4--feature-store-feature_storepy)
+* [3.8. Data Versioning with DVC](#38-data-versioning-with-dvc)
+* [3.9. Running the Pipeline](#39-running-the-pipeline)
 
 [4. Milestone 4: Model Training & Experiment Tracking](#4-milestone-4-model-training--experiment-tracking)
 
